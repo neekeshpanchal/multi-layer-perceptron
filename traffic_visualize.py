@@ -13,6 +13,7 @@ import tkinter as tk
 from tkinter import messagebox
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.initializers import GlorotUniform
+import dearpygui.dearpygui as dpg
 
 # Load Data
 df = pd.read_csv('Traffic.csv')
@@ -83,44 +84,48 @@ plt.show()
 # GUI 
 def make_prediction():
     try:
-        car_count = int(entry_car.get())
-        bike_count = int(entry_bike.get())
-        bus_count = int(entry_bus.get())
-        truck_count = int(entry_truck.get())
+        car_count = int(dpg.get_value("car_count"))
+        bike_count = int(dpg.get_value("bike_count"))
+        bus_count = int(dpg.get_value("bus_count"))
+        truck_count = int(dpg.get_value("truck_count"))
 
         scaled_input = scaler.transform([[car_count, bike_count, bus_count, truck_count]])
-
         prediction = model.predict(scaled_input)
         traffic_situation = le.inverse_transform([np.argmax(prediction)])
-
-        messagebox.showinfo("Prediction", f"Traffic situation is expected to be: {traffic_situation[0]}")
+        
+        dpg.set_value("prediction_output", f"Traffic situation is expected to be: {traffic_situation[0]}")
     except Exception as e:
-        messagebox.showerror("Error", f"An error occurred: {e}")
+        dpg.set_value("prediction_output", f"An error occurred: {e}")
 
-# Create the main window
-root = tk.Tk()
-root.title("Traffic Prediction")
+# Initialize Dear PyGui
+dpg.create_context()
 
-# Create and place input fields in the window
-tk.Label(root, text="Car Count:").grid(row=0, column=0)
-entry_car = tk.Entry(root)
-entry_car.grid(row=0, column=1)
 
-tk.Label(root, text="Bike Count:").grid(row=1, column=0)
-entry_bike = tk.Entry(root)
-entry_bike.grid(row=1, column=1)
+# Initialize Dear PyGui
+dpg.create_context()
 
-tk.Label(root, text="Bus Count:").grid(row=2, column=0)
-entry_bus = tk.Entry(root)
-entry_bus.grid(row=2, column=1)
+with dpg.window(label="Traffic Prediction", width=600, height=300):
+    # Add input fields
+    dpg.add_input_int(label="Car Count", tag="car_count")
+    dpg.add_input_int(label="Bike Count", tag="bike_count")
+    dpg.add_input_int(label="Bus Count", tag="bus_count")
+    dpg.add_input_int(label="Truck Count", tag="truck_count")
 
-tk.Label(root, text="Truck Count:").grid(row=3, column=0)
-entry_truck = tk.Entry(root)
-entry_truck.grid(row=3, column=1)
+    # Add button
+    dpg.add_button(label="Predict Traffic Situation", callback=make_prediction)
 
-# Create and place the prediction button in the window
-predict_button = tk.Button(root, text="Predict Traffic Situation", command=make_prediction)
-predict_button.grid(row=4, column=0, columnspan=2)
+    # Add output text
+    dpg.add_text("", tag="prediction_output")
 
-# Run the main loop
-root.mainloop()
+# Create viewport
+dpg.create_viewport(title='Traffic Prediction', width=600, height=300)
+
+# Setup and show the viewport
+dpg.setup_dearpygui()
+dpg.show_viewport()
+
+# Start the Dear PyGui event loop
+dpg.start_dearpygui()
+
+# Cleanup
+dpg.destroy_context()
