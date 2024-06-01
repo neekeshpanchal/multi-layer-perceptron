@@ -100,31 +100,24 @@ def make_prediction():
 # Initialize Dear PyGui
 dpg.create_context()
 
-
-# Initialize Dear PyGui
-dpg.create_context()
-
 with dpg.window(label="Traffic Prediction", width=600, height=300):
-    # Add input fields
+    # Input Fields
     dpg.add_input_int(label="Car Count", tag="car_count")
     dpg.add_input_int(label="Bike Count", tag="bike_count")
     dpg.add_input_int(label="Bus Count", tag="bus_count")
     dpg.add_input_int(label="Truck Count", tag="truck_count")
 
-    # Add button
+
     dpg.add_button(label="Predict Traffic Situation", callback=make_prediction)
 
-    # Add output text
+
     dpg.add_text("", tag="prediction_output")
 
 # Create viewport
 dpg.create_viewport(title='Traffic Prediction', width=600, height=300)
-
-# Setup and show the viewport
 dpg.setup_dearpygui()
 dpg.show_viewport()
 
-# Start the Dear PyGui event loop
 dpg.start_dearpygui()
 
 # Cleanup
